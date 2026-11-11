@@ -224,13 +224,22 @@
     const result = checked(index);
     const isRight = result && correct(index);
     const rightLabels = question.correct.map(key => question.options.find(option => option.key === key)?.number).join(', ');
+    let glossaryHtml = '';
+    if (result && window.CertLabVocabulary) {
+      const asText = html => new DOMParser().parseFromString(html, 'text/html').body.textContent || '';
+      const promptText = asText(question.prompt);
+      const optionText = [...question.options.map(option => asText(option.html)), asText(question.explanation)].join(' ');
+      const terms = window.CertLabVocabulary.find(promptText, optionText);
+      const meaning = window.CertLabVocabulary.intent(promptText, question.correct.length);
+      glossaryHtml = `<section class="vocabulary" aria-label="Giải nghĩa từ vựng"><div class="vocabulary-heading"><h3>Từ vựng & cách hiểu câu hỏi</h3><span>EN → VI</span></div><p class="question-intent"><strong>Ý câu hỏi:</strong> ${escapeHtml(meaning)}</p><p class="vocabulary-intro">Những từ và cụm từ này xuất hiện trong câu hỏi, lựa chọn hoặc lời giải:</p><dl class="vocabulary-list">${terms.map(entry => `<div class="vocabulary-item"><dt>${escapeHtml(entry.term)}</dt><dd>${escapeHtml(entry.meaning)}</dd></div>`).join('')}</dl></section>`;
+    }
     $('#question-panel').innerHTML = `<article class="question-card"><div class="question-top"><span class="question-kind">${question.limit > 1 ? `Chọn tối đa ${question.limit} đáp án` : 'Chọn một đáp án'}</span><div class="question-tools"><button class="tool-button ${item(index).flagged ? 'flagged' : ''}" id="flag-button" type="button">${item(index).flagged ? '⚑ Bỏ đánh dấu' : '⚑ Đánh dấu'}</button><button class="tool-button" id="reset-question" type="button">↺ Làm lại câu này</button></div></div><div class="question-title-row"><span class="question-number">${index + 1}</span><div class="rich-text">${question.prompt}</div></div><p class="selection-hint">${result ? 'Đã kiểm tra đáp án' : question.limit > 1 ? `Chọn ${question.correct.length} đáp án phù hợp · Đã chọn ${values.length}/${question.limit}` : 'Chọn 1 đáp án rồi kiểm tra'}</p><div class="options" role="group" aria-label="Các lựa chọn">${question.options.map(option => {
       const chosen = values.includes(option.key);
       const good = result && question.correct.includes(option.key);
       const bad = result && chosen && !good;
       const status = good ? 'Đúng' : bad ? 'Sai' : '';
       return `<button type="button" class="option ${question.limit > 1 ? 'multi' : ''} ${chosen ? 'selected' : ''} ${good ? 'correct' : ''} ${bad ? 'wrong' : ''}" data-option="${option.key}" aria-pressed="${chosen}" ${result ? 'disabled' : ''}><span class="option-marker">${chosen || good ? '✓' : ''}</span><span class="option-index">${option.number}</span><span class="option-content rich-text">${option.html}</span><span class="option-status">${status}</span></button>`;
-    }).join('')}</div>${result ? `<div class="feedback ${isRight ? '' : 'wrong'}" role="status"><strong>${isRight ? '✓ Chính xác!' : '✕ Chưa đúng.'}</strong><div class="feedback-answer">Đáp án đúng: ${rightLabels}</div><div class="rich-text">${question.explanation}</div></div>` : ''}${inlineError ? `<p class="inline-error" role="alert">${escapeHtml(inlineError)}</p>` : ''}<div class="question-actions"><button id="previous-button" class="button subtle" type="button" ${index === 0 ? 'disabled' : ''}>← Câu trước</button><div class="action-right">${result ? `<button id="next-button" class="button primary" type="button" ${index === questions.length - 1 ? 'disabled' : ''}>Câu tiếp theo →</button>` : `<button id="check-button" class="button primary" type="button">Kiểm tra đáp án</button>`}</div></div></article>`;
+    }).join('')}</div>${result ? `<div class="feedback ${isRight ? '' : 'wrong'}" role="status"><strong>${isRight ? '✓ Chính xác!' : '✕ Chưa đúng.'}</strong><div class="feedback-answer">Đáp án đúng: ${rightLabels}</div><div class="rich-text">${question.explanation}</div></div>` : ''}${glossaryHtml}${inlineError ? `<p class="inline-error" role="alert">${escapeHtml(inlineError)}</p>` : ''}<div class="question-actions"><button id="previous-button" class="button subtle" type="button" ${index === 0 ? 'disabled' : ''}>← Câu trước</button><div class="action-right">${result ? `<button id="next-button" class="button primary" type="button" ${index === questions.length - 1 ? 'disabled' : ''}>Câu tiếp theo →</button>` : `<button id="check-button" class="button primary" type="button">Kiểm tra đáp án</button>`}</div></div></article>`;
   }
   function updateItem(patch) {
     const id = questions[progress.current].id;
