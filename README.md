@@ -1,6 +1,6 @@
 # CertLab
 
-Ứng dụng ôn tập bốn bộ đề chứng chỉ Claude. Dữ liệu câu hỏi, đáp án, giải thích và hình minh họa được mã hóa bằng AES-256-GCM trước khi đưa vào repo này. Mật khẩu không nằm trong mã nguồn.
+Ứng dụng ôn tập bốn bộ đề chứng chỉ Claude. Dữ liệu câu hỏi, bản dịch, đáp án, giải thích và hình minh họa được mã hóa bằng AES-256-GCM trước khi đưa vào repo này. Mật khẩu không nằm trong mã nguồn.
 
 ## Truy cập
 
